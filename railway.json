@@ -1,0 +1,39 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "healthcheckPath": "/healthz",
+    "healthcheckTimeout": 120,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  },
+  "envVars": {
+    "INSTANTLY_API_KEY": {
+      "description": "Your Instantly.ai API key (required)",
+      "required": true
+    },
+    "INSTANTLY_RETRY_MAX_ATTEMPTS": {
+      "description": "Maximum number of retry attempts (default: 3)",
+      "default": "3",
+      "required": false
+    },
+    "INSTANTLY_RETRY_INITIAL_DELAY": {
+      "description": "Initial retry delay in milliseconds (default: 1000)",
+      "default": "1000",
+      "required": false
+    },
+    "INSTANTLY_RETRY_MAX_DELAY": {
+      "description": "Maximum retry delay in milliseconds (default: 10000)",
+      "default": "10000",
+      "required": false
+    },
+    "INSTANTLY_RETRY_BACKOFF_FACTOR": {
+      "description": "Retry backoff factor (default: 2)",
+      "default": "2",
+      "required": false
+    }
+  }
+}
