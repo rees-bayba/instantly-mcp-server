@@ -320,8 +320,9 @@ const server = new Server(
   }
 );
 
-// Define tool schemas - Analytics
-const analyticsToolSchemas = {
+// Define tool schemas
+const toolSchemas = {
+  // Analytics tools
   get_warmup_analytics: {
     description: 'Get warmup analytics for email accounts',
     inputSchema: {
@@ -331,8 +332,6 @@ const analyticsToolSchemas = {
           type: 'array',
           items: { type: 'string' },
           description: 'List of email addresses to get warmup analytics for',
-          minItems: 1,
-          maxItems: 100,
         },
       },
       required: ['emails'],
@@ -352,40 +351,26 @@ const analyticsToolSchemas = {
     },
   },
   get_campaign_analytics: {
-    description: 'Get analytics for one or multiple campaigns',
+    description: 'Get analytics for campaigns',
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Campaign ID (leave empty for all campaigns)' },
-        ids: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Multiple campaign IDs',
-        },
-        start_date: { type: 'string', description: 'Start date (YYYY-MM-DD)' },
-        end_date: { type: 'string', description: 'End date (YYYY-MM-DD)' },
-        exclude_total_leads_count: { type: 'boolean', description: 'Exclude total leads count' },
+        id: { type: 'string', description: 'Campaign ID' },
+        ids: { type: 'array', items: { type: 'string' } },
+        start_date: { type: 'string' },
+        end_date: { type: 'string' },
       },
     },
   },
   get_campaign_analytics_overview: {
-    description: 'Get analytics overview for campaigns',
+    description: 'Get campaign analytics overview',
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Campaign ID (leave empty for all campaigns)' },
-        ids: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Multiple campaign IDs',
-        },
-        start_date: { type: 'string', description: 'Start date (YYYY-MM-DD)' },
-        end_date: { type: 'string', description: 'End date (YYYY-MM-DD)' },
-        campaign_status: {
-          type: 'number',
-          description: 'Filter by campaign status',
-          enum: [0, 1, 2, 3, 4, -99, -1, -2],
-        },
+        id: { type: 'string' },
+        ids: { type: 'array', items: { type: 'string' } },
+        start_date: { type: 'string' },
+        end_date: { type: 'string' },
       },
     },
   },
@@ -394,14 +379,9 @@ const analyticsToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        campaign_id: { type: 'string', description: 'Campaign ID (optional)' },
-        start_date: { type: 'string', description: 'Start date (YYYY-MM-DD)' },
-        end_date: { type: 'string', description: 'End date (YYYY-MM-DD)' },
-        campaign_status: {
-          type: 'number',
-          description: 'Filter by campaign status',
-          enum: [0, 1, 2, 3, 4, -99, -1, -2],
-        },
+        campaign_id: { type: 'string' },
+        start_date: { type: 'string' },
+        end_date: { type: 'string' },
       },
     },
   },
@@ -410,29 +390,23 @@ const analyticsToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        campaign_id: { type: 'string', description: 'Campaign ID (optional)' },
-        start_date: { type: 'string', description: 'Start date (YYYY-MM-DD)' },
-        end_date: { type: 'string', description: 'End date (YYYY-MM-DD)' },
+        campaign_id: { type: 'string' },
+        start_date: { type: 'string' },
+        end_date: { type: 'string' },
       },
     },
   },
-};
-
-// Account tool schemas
-const accountToolSchemas = {
+  
+  // Account tools
   create_account: {
     description: 'Create a new email account',
     inputSchema: {
       type: 'object',
       properties: {
-        email: { type: 'string', format: 'email', description: 'Email address' },
-        first_name: { type: 'string', description: 'First name' },
-        last_name: { type: 'string', description: 'Last name' },
-        provider_code: {
-          type: 'number',
-          description: 'Provider code (1=Custom, 2=Google, 3=Microsoft, 4=AWS)',
-          enum: [1, 2, 3, 4],
-        },
+        email: { type: 'string' },
+        first_name: { type: 'string' },
+        last_name: { type: 'string' },
+        provider_code: { type: 'number' },
         imap_username: { type: 'string' },
         imap_password: { type: 'string' },
         imap_host: { type: 'string' },
@@ -441,14 +415,8 @@ const accountToolSchemas = {
         smtp_password: { type: 'string' },
         smtp_host: { type: 'string' },
         smtp_port: { type: 'number' },
-        warmup: { type: 'object' },
-        daily_limit: { type: 'number' },
-        tracking_domain_name: { type: 'string' },
-        sending_gap: { type: 'number', minimum: 0, maximum: 1440 },
       },
-      required: ['email', 'first_name', 'last_name', 'provider_code', 'imap_username', 
-                 'imap_password', 'imap_host', 'imap_port', 'smtp_username', 
-                 'smtp_password', 'smtp_host', 'smtp_port'],
+      required: ['email', 'first_name', 'last_name'],
     },
   },
   list_accounts: {
@@ -456,12 +424,9 @@ const accountToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        limit: { type: 'integer', minimum: 1, maximum: 100 },
+        limit: { type: 'integer' },
         starting_after: { type: 'string' },
         search: { type: 'string' },
-        status: { type: 'number', enum: [1, 2, -1, -2, -3] },
-        provider_code: { type: 'number', enum: [1, 2, 3, 4] },
-        tag_ids: { type: 'string' },
       },
     },
   },
@@ -470,24 +435,20 @@ const accountToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        email: { type: 'string', description: 'Email address of the account' },
+        email: { type: 'string' },
       },
       required: ['email'],
     },
   },
   update_account: {
-    description: 'Update email account settings',
+    description: 'Update email account',
     inputSchema: {
       type: 'object',
       properties: {
-        email: { type: 'string', description: 'Email address of the account' },
+        email: { type: 'string' },
         first_name: { type: 'string' },
         last_name: { type: 'string' },
-        warmup: { type: 'object' },
         daily_limit: { type: 'number' },
-        tracking_domain_name: { type: 'string' },
-        enable_slow_ramp: { type: 'boolean' },
-        sending_gap: { type: 'number', minimum: 0, maximum: 1440 },
       },
       required: ['email'],
     },
@@ -497,7 +458,7 @@ const accountToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        email: { type: 'string', description: 'Email address of the account' },
+        email: { type: 'string' },
       },
       required: ['email'],
     },
@@ -507,7 +468,7 @@ const accountToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        email: { type: 'string', description: 'Email address of the account' },
+        email: { type: 'string' },
       },
       required: ['email'],
     },
@@ -517,7 +478,7 @@ const accountToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        email: { type: 'string', description: 'Email address of the account' },
+        email: { type: 'string' },
       },
       required: ['email'],
     },
@@ -527,7 +488,7 @@ const accountToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        email: { type: 'string', description: 'Email address of the account' },
+        email: { type: 'string' },
       },
       required: ['email'],
     },
@@ -537,44 +498,23 @@ const accountToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        host: { type: 'string', description: 'Custom tracking domain host' },
+        host: { type: 'string' },
       },
       required: ['host'],
     },
   },
-};
-
-// Campaign tool schemas
-const campaignToolSchemas = {
+  
+  // Campaign tools
   create_campaign: {
     description: 'Create a new campaign',
     inputSchema: {
       type: 'object',
       properties: {
-        name: { type: 'string', description: 'Campaign name' },
-        campaign_schedule: {
-          type: 'object',
-          description: 'Campaign schedule settings',
-          properties: {
-            schedules: { type: 'array' },
-            start_date: { type: 'string' },
-            end_date: { type: 'string' },
-          },
-          required: ['schedules'],
-        },
-        pl_value: { type: 'number', description: 'Value of every positive lead' },
-        is_evergreen: { type: 'boolean' },
-        sequences: { type: 'array', description: 'Email sequences' },
-        email_gap: { type: 'number' },
-        random_wait_max: { type: 'number' },
-        text_only: { type: 'boolean' },
-        email_list: { type: 'array', items: { type: 'string' } },
-        daily_limit: { type: 'number' },
-        stop_on_reply: { type: 'boolean' },
-        link_tracking: { type: 'boolean' },
-        open_tracking: { type: 'boolean' },
+        name: { type: 'string' },
+        campaign_schedule: { type: 'object' },
+        sequences: { type: 'array' },
       },
-      required: ['name', 'campaign_schedule'],
+      required: ['name'],
     },
   },
   list_campaigns: {
@@ -582,29 +522,28 @@ const campaignToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        limit: { type: 'integer', minimum: 1, maximum: 100 },
+        limit: { type: 'integer' },
         starting_after: { type: 'string' },
         search: { type: 'string' },
-        tag_ids: { type: 'string' },
       },
     },
   },
   activate_campaign: {
-    description: 'Activate (start) or resume a campaign',
+    description: 'Activate or resume a campaign',
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Campaign ID' },
+        id: { type: 'string' },
       },
       required: ['id'],
     },
   },
   pause_campaign: {
-    description: 'Stop (pause) a campaign',
+    description: 'Pause a campaign',
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Campaign ID' },
+        id: { type: 'string' },
       },
       required: ['id'],
     },
@@ -614,7 +553,7 @@ const campaignToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Campaign ID' },
+        id: { type: 'string' },
       },
       required: ['id'],
     },
@@ -624,15 +563,9 @@ const campaignToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Campaign ID' },
+        id: { type: 'string' },
         name: { type: 'string' },
-        pl_value: { type: 'number' },
-        is_evergreen: { type: 'boolean' },
-        campaign_schedule: { type: 'object' },
-        sequences: { type: 'array' },
-        email_gap: { type: 'number' },
         daily_limit: { type: 'number' },
-        stop_on_reply: { type: 'boolean' },
       },
       required: ['id'],
     },
@@ -642,7 +575,7 @@ const campaignToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Campaign ID' },
+        id: { type: 'string' },
       },
       required: ['id'],
     },
@@ -652,27 +585,458 @@ const campaignToolSchemas = {
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Campaign ID' },
+        id: { type: 'string' },
       },
       required: ['id'],
     },
   },
-};
-
-// Email tool schemas
-const emailToolSchemas = {
+  
+  // Email tools
   reply_to_email: {
     description: 'Send a reply to an email',
     inputSchema: {
       type: 'object',
       properties: {
-        reply_to_uuid: { type: 'string', description: 'ID of the email to reply to' },
-        eaccount: { type: 'string', description: 'Email account to send from' },
-        subject: { type: 'string', description: 'Email subject' },
-        body: {
-          type: 'object',
-          properties: {
-            html: { type: 'string' },
-            text: { type: 'string' },
-          },
+        reply_to_uuid: { type: 'string' },
+        eaccount: { type: 'string' },
+        subject: { type: 'string' },
+        body: { type: 'object' },
+      },
+      required: ['reply_to_uuid', 'eaccount', 'subject', 'body'],
+    },
+  },
+  list_emails: {
+    description: 'List emails with filters',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        limit: { type: 'integer' },
+        starting_after: { type: 'string' },
+        search: { type: 'string' },
+        campaign_id: { type: 'string' },
+      },
+    },
+  },
+  get_email: {
+    description: 'Get email details',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+  update_email: {
+    description: 'Update email properties',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        is_unread: { type: 'boolean' },
+      },
+      required: ['id'],
+    },
+  },
+  delete_email: {
+    description: 'Delete an email',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+  count_unread_emails: {
+    description: 'Get count of unread emails',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  mark_thread_as_read: {
+    description: 'Mark email thread as read',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        thread_id: { type: 'string' },
+      },
+      required: ['thread_id'],
+    },
+  },
+  
+  // Email verification tools
+  verify_email: {
+    description: 'Verify an email address',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+      },
+      required: ['email'],
+    },
+  },
+  get_email_verification: {
+    description: 'Get email verification status',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+      },
+      required: ['email'],
+    },
+  },
+  
+  // Lead tools
+  create_lead: {
+    description: 'Create a new lead',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        first_name: { type: 'string' },
+        last_name: { type: 'string' },
+        company: { type: 'string' },
+      },
+      required: ['email'],
+    },
+  },
+  list_leads: {
+    description: 'List leads with filters',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaign_id: { type: 'string' },
+        list_id: { type: 'string' },
+        limit: { type: 'integer' },
+        offset: { type: 'integer' },
+      },
+    },
+  },
+  get_lead: {
+    description: 'Get lead details',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+  update_lead: {
+    description: 'Update lead information',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        first_name: { type: 'string' },
+        last_name: { type: 'string' },
+        company: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+  delete_lead: {
+    description: 'Delete a lead',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+  merge_leads: {
+    description: 'Merge duplicate leads',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        primary_lead_id: { type: 'string' },
+        lead_ids_to_merge: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['primary_lead_id', 'lead_ids_to_merge'],
+    },
+  },
+  update_lead_interest_status: {
+    description: 'Update lead interest status',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        lead_id: { type: 'string' },
+        interest_status: { type: 'string' },
+      },
+      required: ['lead_id', 'interest_status'],
+    },
+  },
+  
+  // Lead list tools
+  create_lead_list: {
+    description: 'Create a new lead list',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        description: { type: 'string' },
+      },
+      required: ['name'],
+    },
+  },
+  list_lead_lists: {
+    description: 'List all lead lists',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        limit: { type: 'integer' },
+        starting_after: { type: 'string' },
+      },
+    },
+  },
+  get_lead_list: {
+    description: 'Get lead list details',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+  update_lead_list: {
+    description: 'Update lead list information',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+        description: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+  delete_lead_list: {
+    description: 'Delete a lead list',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+      },
+      required: ['id'],
+    },
+  },
+} as const;
+
+// Handle list tools request
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  return {
+    tools: Object.entries(toolSchemas).map(([name, schema]) => ({
+      name,
+      description: schema.description,
+      inputSchema: schema.inputSchema,
+    })),
+  };
+});
+
+// Handle tool execution
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const client = new InstantlyClient(INSTANTLY_API_KEY);
+  const { name, arguments: args } = request.params;
+
+  try {
+    let result;
+    
+    // Type guard to ensure args is defined
+    if (!args) {
+      throw new Error('No arguments provided');
+    }
+    
+    // Cast args to any to bypass TypeScript strict checking
+    const params = args as any;
+    
+    switch (name) {
+      // Analytics tools
+      case 'get_warmup_analytics':
+        result = await client.getWarmupAnalytics(params.emails);
+        break;
+      case 'test_account_vitals':
+        result = await client.testAccountVitals(params.accounts);
+        break;
+      case 'get_campaign_analytics':
+        result = await client.getCampaignAnalytics(params);
+        break;
+      case 'get_campaign_analytics_overview':
+        result = await client.getCampaignAnalyticsOverview(params);
+        break;
+      case 'get_daily_campaign_analytics':
+        result = await client.getDailyCampaignAnalytics(params);
+        break;
+      case 'get_campaign_steps_analytics':
+        result = await client.getCampaignStepsAnalytics(params);
+        break;
+      
+      // Account tools
+      case 'create_account':
+        result = await client.createAccount(params);
+        break;
+      case 'list_accounts':
+        result = await client.listAccounts(params);
+        break;
+      case 'get_account':
+        result = await client.getAccount(params.email);
+        break;
+      case 'update_account':
+        const { email: updateEmail, ...updateData } = params;
+        result = await client.updateAccount(updateEmail, updateData);
+        break;
+      case 'delete_account':
+        result = await client.deleteAccount(params.email);
+        break;
+      case 'pause_account':
+        result = await client.pauseAccount(params.email);
+        break;
+      case 'resume_account':
+        result = await client.resumeAccount(params.email);
+        break;
+      case 'mark_account_fixed':
+        result = await client.markAccountFixed(params.email);
+        break;
+      case 'get_tracking_domain_status':
+        result = await client.getCustomTrackingDomainStatus(params.host);
+        break;
+      
+      // Campaign tools
+      case 'create_campaign':
+        result = await client.createCampaign(params);
+        break;
+      case 'list_campaigns':
+        result = await client.listCampaigns(params);
+        break;
+      case 'activate_campaign':
+        result = await client.activateCampaign(params.id);
+        break;
+      case 'pause_campaign':
+        result = await client.pauseCampaign(params.id);
+        break;
+      case 'get_campaign':
+        result = await client.getCampaign(params.id);
+        break;
+      case 'update_campaign':
+        const { id: campaignId, ...campaignData } = params;
+        result = await client.updateCampaign(campaignId, campaignData);
+        break;
+      case 'delete_campaign':
+        result = await client.deleteCampaign(params.id);
+        break;
+      case 'share_campaign':
+        result = await client.shareCampaign(params.id);
+        break;
+      
+      // Email tools
+      case 'reply_to_email':
+        result = await client.replyToEmail(params);
+        break;
+      case 'list_emails':
+        result = await client.listEmails(params);
+        break;
+      case 'get_email':
+        result = await client.getEmail(params.id);
+        break;
+      case 'update_email':
+        const { id: emailId, ...emailData } = params;
+        result = await client.updateEmail(emailId, emailData);
+        break;
+      case 'delete_email':
+        result = await client.deleteEmail(params.id);
+        break;
+      case 'count_unread_emails':
+        result = await client.countUnreadEmails();
+        break;
+      case 'mark_thread_as_read':
+        result = await client.markThreadAsRead(params.thread_id);
+        break;
+      
+      // Email verification tools
+      case 'verify_email':
+        result = await client.verifyEmail(params.email);
+        break;
+      case 'get_email_verification':
+        result = await client.getEmailVerification(params.email);
+        break;
+      
+      // Lead tools
+      case 'create_lead':
+        result = await client.createLead(params);
+        break;
+      case 'list_leads':
+        result = await client.listLeads(params);
+        break;
+      case 'get_lead':
+        result = await client.getLead(params.id);
+        break;
+      case 'update_lead':
+        const { id: leadId, ...leadData } = params;
+        result = await client.updateLead(leadId, leadData);
+        break;
+      case 'delete_lead':
+        result = await client.deleteLead(params.id);
+        break;
+      case 'merge_leads':
+        result = await client.mergeLeads(params);
+        break;
+      case 'update_lead_interest_status':
+        result = await client.updateLeadInterestStatus(params);
+        break;
+      
+      // Lead list tools
+      case 'create_lead_list':
+        result = await client.createLeadList(params);
+        break;
+      case 'list_lead_lists':
+        result = await client.listLeadLists(params);
+        break;
+      case 'get_lead_list':
+        result = await client.getLeadList(params.id);
+        break;
+      case 'update_lead_list':
+        const { id: listId, ...listData } = params;
+        result = await client.updateLeadList(listId, listData);
+        break;
+      case 'delete_lead_list':
+        result = await client.deleteLeadList(params.id);
+        break;
+      
+      default:
+        throw new Error(`Unknown tool: ${name}`);
+    }
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
         },
+      ],
+    };
+  } catch (error: any) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Error: ${error.message}`,
+        },
+      ],
+    };
+  }
+});
+
+// Start the server
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error('Instantly MCP Server running on stdio');
+}
+
+main().catch((error) => {
+  console.error('Server error:', error);
+  process.exit(1);
+});
