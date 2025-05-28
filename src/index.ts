@@ -131,6 +131,10 @@ class InstantlyClient {
     return this.request('/campaigns/analytics', 'GET', params);
   }
 
+  async getCampaignAnalyticsById(campaignId: string) {
+    return this.request(`/campaigns/${campaignId}/analytics`);
+  }
+
   async getCampaignAnalyticsOverview(params: any) {
     return this.request('/campaigns/analytics/overview', 'GET', params);
   }
@@ -305,7 +309,6 @@ class InstantlyClient {
     return this.request(`/lead-lists/${id}`, 'DELETE');
   }
 
-  // NEW METHODS ADDED BELOW THIS LINE
   // Additional Campaign endpoints
   async getCampaignSchedules(campaignId: string) {
     return this.request(`/campaigns/${campaignId}/schedules`);
@@ -412,10 +415,6 @@ class InstantlyClient {
 
   async replyToLead(data: any) {
     return this.request(`/campaigns/${data.campaign_id}/reply`, 'POST', data);
-  }
-
-  async getCampaignAnalytics(campaignId: string) {
-    return this.request(`/campaigns/${campaignId}/analytics`);
   }
 
   async getEmailAccountAnalytics() {
@@ -1279,7 +1278,7 @@ const toolSchemas = {
     },
   },
 
-  // NEW TOOL SCHEMAS ADDED BELOW THIS LINE
+  // Additional tools
   remove_lead_from_subsequence: {
     description: 'Remove a lead from a subsequence',
     inputSchema: {
@@ -1292,7 +1291,7 @@ const toolSchemas = {
     },
   },
 
-  // Additional Campaign tools from original file
+  // Additional Campaign tools
   get_campaign_schedules: {
     description: 'Get campaign schedules',
     inputSchema: {
@@ -1429,6 +1428,16 @@ const toolSchemas = {
         end_date: { type: 'string', description: 'End date (YYYY-MM-DD)' },
       },
       required: ['campaign_id', 'start_date', 'end_date'],
+    },
+  },
+  get_campaign_analytics_by_id: {
+    description: 'Get analytics for a specific campaign',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaign_id: { type: 'string', description: 'Campaign ID' },
+      },
+      required: ['campaign_id'],
     },
   },
   get_campaign_statistics: {
@@ -1664,16 +1673,6 @@ const toolSchemas = {
         add_signature: { type: 'boolean', description: 'Add signature to reply (optional)' },
       },
       required: ['campaign_id', 'email_stats_id', 'email_body', 'reply_message_id', 'reply_email_time', 'reply_email_body'],
-    },
-  },
-  get_campaign_analytics: {
-    description: 'Get analytics for a specific campaign',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        campaign_id: { type: 'string', description: 'Campaign ID' },
-      },
-      required: ['campaign_id'],
     },
   },
   get_email_account_analytics: {
@@ -2780,7 +2779,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = await client.deleteLeadList(params.id);
         break;
 
-      // NEW CASE STATEMENTS ADDED BELOW THIS LINE
+      // Additional tools
       case 'remove_lead_from_subsequence':
         result = await client.removeLeadFromSubsequence(params);
         break;
@@ -2812,6 +2811,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'get_campaign_analytics_by_date':
         result = await client.getCampaignAnalyticsByDate(params.campaign_id, params.start_date, params.end_date);
+        break;
+      case 'get_campaign_analytics_by_id':
+        result = await client.getCampaignAnalyticsById(params.campaign_id);
         break;
       case 'get_campaign_statistics':
         result = await client.getCampaignStatistics(params);
@@ -2863,9 +2865,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'reply_to_lead':
         result = await client.replyToLead(params);
-        break;
-      case 'get_campaign_analytics':
-        result = await client.getCampaignAnalytics(params.campaign_id);
         break;
       case 'get_email_account_analytics':
         result = await client.getEmailAccountAnalytics();
