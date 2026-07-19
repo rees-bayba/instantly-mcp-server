@@ -1046,27 +1046,37 @@ const toolSchemas = {
   
   // Email tools
   reply_to_email: {
-    description: 'Send a reply to an email',
+    description: 'Send a reply to an existing email. reply_to_uuid is the id (uuid) of the email being replied to; body must be an object containing html and/or text.',
     inputSchema: {
       type: 'object',
       properties: {
-        reply_to_uuid: { type: 'string' },
-        eaccount: { type: 'string' },
-        subject: { type: 'string' },
-        body: { type: 'object' },
+        reply_to_uuid: { type: 'string', description: 'UUID of the email being replied to (the id returned by list_emails/get_email).' },
+        eaccount: { type: 'string', description: 'Email account used to send the reply.' },
+        subject: { type: 'string', description: 'Subject line of the reply.' },
+        body: {
+          type: 'object',
+          description: 'Reply content. Provide html and/or text.',
+          properties: {
+            html: { type: 'string', description: 'HTML body of the reply.' },
+            text: { type: 'string', description: 'Plain-text body of the reply.' },
+          },
+        },
       },
       required: ['reply_to_uuid', 'eaccount', 'subject', 'body'],
     },
   },
   list_emails: {
-    description: 'List emails with filters',
+    description: 'List emails, optionally filtered. To fetch every message in a single conversation/thread, pass thread_id (all messages in a thread share the same thread_id); order the results by timestamp_email to reconstruct the conversation.',
     inputSchema: {
       type: 'object',
       properties: {
-        limit: { type: 'integer' },
-        starting_after: { type: 'string' },
-        search: { type: 'string' },
-        campaign_id: { type: 'string' },
+        thread_id: { type: 'string', description: 'Return all emails belonging to this thread. Use this to fetch a full conversation before drafting a reply.' },
+        eaccount: { type: 'string', description: 'Filter by the sending email account. Accepts a comma-separated list of account email addresses.' },
+        lead: { type: 'string', description: "Filter by the lead's email address." },
+        campaign_id: { type: 'string', description: 'Filter by campaign id.' },
+        limit: { type: 'integer', description: 'Maximum number of emails to return.' },
+        starting_after: { type: 'string', description: 'Pagination cursor; return results after this id.' },
+        search: { type: 'string', description: 'Free-text search filter.' },
       },
     },
   },
